@@ -162,6 +162,10 @@ class PandaNGE_RP(PandaNGE):
     def get_task_states(self, task_ids=None):
 
         units = self._umgr.get_units(task_ids)
+
+        if   not units:                   units = list()
+        elif not isinstance(units, list): units = [units]
+
         return [unit.state for unit in units]
 
 
