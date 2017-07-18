@@ -1,6 +1,15 @@
 
-def magic(*arg, **kwarg):
-    return None
+__copyright__ = "Copyright 2013-2014, http://radical.rutgers.edu"
+__license__   = "MIT"
+
+
+
+from .session                   import *
+from .pilot_manager             import *
+from .unit_manager              import *
+from .compute_unit_description  import *
+from .compute_pilot_description import *
+from .states                    import *
 
 
 # --------------------------------------------------------------------------
@@ -8,8 +17,6 @@ def magic(*arg, **kwarg):
 # see https://docs.google.com/document/d/1bm8ucgfi9SHjDy0w-ZX5NIdkjk87qFClMB9jMse75uM
 #
 class PandaNGE(object):
-
-
 
     # --------------------------------------------------------------------------
     #
@@ -19,9 +26,29 @@ class PandaNGE(object):
         '''
 
         self._url = url
-        self._session = rp.Session()
-        self._pmgr    = rp.PilotManager(self._session)
-        self._umgr    = rp.UnitManager(self._session)
+        self._session = Session()
+        self._pmgr    = PilotManager(self._session)
+        self._umgr    = UnitManager(self._session)
+
+        pd = {'resource' : 'local.localhost',
+              'cores'    : 4, 
+              'runtime'  : 15}
+        self._pmgr.submit_pilots(ComputePilotDescription(pd))
+
+
+    # --------------------------------------------------------------------------
+    #
+    @property
+    def uid(self):
+
+        return self._session.uid
+
+
+    # --------------------------------------------------------------------------
+    #
+    def close(self):
+
+        self._session.close()
 
 
     # --------------------------------------------------------------------------
@@ -33,7 +60,7 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
-    def find_resources(self, states):
+    def find_resources(self, states=None):
 
         if   not states                  : states = list()
         elif not isinstance(states, list): states = [states]
@@ -51,16 +78,7 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
-    def get_resource_states(self, resource_ids):
-
-        pilots = self._pmgr.get_pilots(resource_ids)
-        return [pilot.state for pilot in pilots]
-
-
-
-    # --------------------------------------------------------------------------
-    #
-    def get_resource_info(self, resource_ids):
+    def get_resource_info(self, resource_ids=None):
 
         if   not resource_ids                  : resource_ids = list()
         elif not isinstance(resource_ids, list): resource_ids = [resource_ids]
@@ -79,20 +97,18 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
-    def wait_resource(self, resource_ids, states, timeout=None):
+    def get_resource_states(self, resource_ids=None):
 
-        return self._pmgr.wait_units(uids=resource_ids, state=states,
-                                     timeout=timeout)
+        pilots = self._pmgr.get_pilots(resource_ids)
+        return [pilot.state for pilot in pilots]
 
 
     # --------------------------------------------------------------------------
     #
-    def get_states(self, unit_ids):
+    def wait_resource_states(self, resource_ids=None, states=None, timeout=None):
 
-        units = self._umgr.get_units(unit_ids)
-        return [unit.state for unit in units]
-
-
+        return self._pmgr.wait_pilots(uids=resource_ids, state=states,
+                                      timeout=timeout)
 
 
     # --------------------------------------------------------------------------
@@ -106,22 +122,19 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
-    def wait_units(self, unit_ids, states, timeout=None):
-
-        return self._umgr.wait_units(uids=unit_ids, state=states,
-                                     timeout=timeout)
-
-
-    # --------------------------------------------------------------------------
-    #
-    def get_states(self, unit_ids):
+    def get_unit_states(self, unit_ids=None):
 
         units = self._umgr.get_units()
         return [unit.state for unit in units]
 
 
+    # --------------------------------------------------------------------------
+    #
+    def wait_unit_states(self, unit_ids=None, states=None, timeout=None):
+
+        return self._umgr.wait_units(uids=unit_ids, state=states,
+                                     timeout=timeout)
 
 
-
-
+# ------------------------------------------------------------------------------
 
