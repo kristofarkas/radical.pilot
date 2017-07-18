@@ -4,6 +4,7 @@ __license__   = "MIT"
 
 
 import os
+import sys
 
 from .panda_nge import PandaNGE
 
