@@ -2,6 +2,9 @@
 __copyright__ = "Copyright 2013-2014, http://radical.rutgers.edu"
 __license__   = "MIT"
 
+
+import os
+
 from .panda_nge import PandaNGE
 
 from .session                   import *
@@ -10,10 +13,6 @@ from .unit_manager              import *
 from .compute_unit_description  import *
 from .compute_pilot_description import *
 from .states                    import *
-
-RP   = 'radical.pilot'
-RPS  = 'radical.pilot.service'
-DB   = 'radical.pilot.db'
 
 # --------------------------------------------------------------------------
 #
@@ -37,9 +36,15 @@ class PandaNGE_RP(PandaNGE):
         self._umgr    = UnitManager(self._session)
 
 
+        pwd   = os.getcwd()
+        fname = '%s/panda_nge_pilot.json' % pwd
         try:
-            pilot_descriptions = ru.read_json('./panda_nge_pilot.json')
-        except:
+            pilot_descriptions = ru.read_json(fname)
+        except Exception as e:
+            sys.stderr.write('failed to read %s: %s\n' % (fname, e))
+            sys.stderr.write('falling back to default configuration')
+            sys.stderr.flush()
+
             pilot_descriptions = [{'resource': 'local.localhost', 
                                    'cores'   : 4, 
                                    'runtime' : 15}]

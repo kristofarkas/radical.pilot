@@ -66,12 +66,20 @@ class PandaNGE_Server(object):
 
     # --------------------------------------------------------------------------
     #
+    @methodroute('/close/', method="PUT")
     def close(self):
 
-        self._log.info('closing')
-        self._closed = True
-        self._backend.close()
-        self._log.info('closed')
+        try:
+            self._log.info('closing')
+            self._closed = True
+            self._backend.close()
+            self._log.info('closed')
+            return {"success" : True,
+                    "result"  : None}
+        except Exception as e:
+            self._log.exception('oops')
+            return {"success" : False,
+                    "error"   : repr(e)}
 
 
     # --------------------------------------------------------------------------

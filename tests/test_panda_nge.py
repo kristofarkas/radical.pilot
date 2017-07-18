@@ -32,6 +32,7 @@ def test_query(op, query, data=None):
         assert(result['success'])
 
 
+test_query('get', '/uid/')
 test_query('get', '/resources/')
 test_query('get', '/resources/pilot.0000/info')
 test_query('get', '/resources/pilot.0000/state')
@@ -41,4 +42,5 @@ time.sleep(1)
 test_query('get', '/tasks/')
 test_query('get', '/tasks/unit.000000/state')
 test_query('get', '/tasks/unit.000000/wait/DONE/0')
+test_query('put', '/close/')
 
