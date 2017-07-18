@@ -26,10 +26,6 @@ class PandaNGE(object):
         '''
 
         self._url = url
-        self._rep = ru.LogReporter(name='radical.pilot')
-        self._rep.title('Panda-NGE Integration Layer')
-        self._rep.header('session setup')
-
         self._session = Session()
         self._pmgr    = PilotManager(self._session)
         self._umgr    = UnitManager(self._session)
@@ -39,7 +35,6 @@ class PandaNGE(object):
               'runtime'  : 15}
         pilot = self._pmgr.submit_pilots(ComputePilotDescription(pd))
         self._umgr.add_pilots(pilot)
-        self._rep.header('session setup done')
 
 
     # --------------------------------------------------------------------------
