@@ -8,6 +8,7 @@ import radical.utils as ru
 import radical.pilot as rp
 
 import bottle
+import json
 
 
 # ------------------------------------------------------------------------------
@@ -181,10 +182,25 @@ class PandaNGE_Server(object):
 
     # --------------------------------------------------------------------------
     #
+    @methodroute('/tasks/', method="GET")
+    def list_tasks(self):
+
+        try:
+            ret = self._backend.list_tasks()
+            return {"success" : True,
+                    "result"  : ret}
+        except Exception as e:
+            self._log.exception('oops')
+            return {"success" : False,
+                    'error'   : repr(e)}
+
+
+    # --------------------------------------------------------------------------
+    #
     @methodroute('/tasks/', method="PUT")
     def submit_tasks(self):
 
-        descriptions = bottle.request.body.read()
+        descriptions = json.loads(bottle.request.body.read())
 
         try:
             ret = self._backend.submit_tasks(descriptions)

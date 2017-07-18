@@ -106,6 +106,13 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
+    def list_tasks(self):
+
+        return self._binding.list_tasks()
+
+
+    # --------------------------------------------------------------------------
+    #
     def get_task_states(self, task_ids=None):
 
         return self._binding.get_task_states(task_ids)

@@ -36,6 +36,10 @@ if __name__ == '__main__':
         print panda_nge.submit_tasks([{'executable' : '/bin/true'}])
         print
 
+        print 'list tasks'
+        print panda_nge.list_tasks()
+        print
+
         print 'get task states'
         print panda_nge.get_task_states()
         print

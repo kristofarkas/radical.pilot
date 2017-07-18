@@ -36,11 +36,20 @@ class PandaNGE_RP(PandaNGE):
         self._pmgr    = PilotManager(self._session)
         self._umgr    = UnitManager(self._session)
 
-        pd = {'resource' : 'local.localhost',
-              'cores'    : 4, 
-              'runtime'  : 15}
-        pilot = self._pmgr.submit_pilots(ComputePilotDescription(pd))
-        self._umgr.add_pilots(pilot)
+
+        try:
+            pilot_descriptions = ru.read_json('./panda_nge_pilot.json')
+        except:
+            pilot_descriptions = [{'resource': 'local.localhost', 
+                                   'cores'   : 4, 
+                                   'runtime' : 15}]
+
+        pds = list()
+        for pd in pilot_descriptions:
+            pds.append(ComputePilotDescription(pd))
+
+        pilots = self._pmgr.submit_pilots(pds)
+        self._umgr.add_pilots(pilots)
 
 
     # --------------------------------------------------------------------------
@@ -139,6 +148,13 @@ class PandaNGE_RP(PandaNGE):
         units = self._umgr.submit_units(cuds)
 
         return [unit.uid for unit in units]
+
+
+    # --------------------------------------------------------------------------
+    #
+    def list_tasks(self):
+
+        return self._umgr.list_units()
 
 
     # --------------------------------------------------------------------------
