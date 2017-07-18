@@ -42,6 +42,10 @@ from .utils                     import logger
 
 
 # ------------------------------------------------------------------------------
+# import API for panda-nge integration
+from panda_nge import *
+
+# ------------------------------------------------------------------------------
 # make submodules available -- mostly for internal use
 import utils
 import worker
