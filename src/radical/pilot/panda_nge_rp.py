@@ -42,8 +42,8 @@ class PandaNGE_RP(PandaNGE):
         try:
             pilot_descriptions = ru.read_json(fname)
         except Exception as e:
-            sys.stderr.write('failed to read %s: %s\n' % (fname, e))
-            sys.stderr.write('falling back to default configuration')
+            sys.stderr.write('failed to read %s\nError: %s\n' % (fname, e))
+            sys.stderr.write('falling back to default configuration\n')
             sys.stderr.flush()
 
             pilot_descriptions = [{'resource': 'local.localhost', 

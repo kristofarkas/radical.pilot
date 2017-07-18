@@ -10,7 +10,8 @@ if __name__ == '__main__':
 
     panda_nge = None
     try:
-        panda_nge = rp.PandaNGE(url=None)
+      # panda_nge = rp.PandaNGE(binding=rp.RP,  url=None)
+        panda_nge = rp.PandaNGE(binding=rp.RPS, url='http://localhost:8080/')
 
         print 'inspect resources'
         print panda_nge.list_resources()

@@ -40,7 +40,8 @@ class PandaNGE(object):
         url    : contact point for the service and DB bindings
         '''
 
-        from .panda_nge_rp import PandaNGE_RP
+        from .panda_nge_rp  import PandaNGE_RP
+        from .panda_nge_rps import PandaNGE_RPS
 
         if   binding == RP : self._binding = PandaNGE_RP (url)
         elif binding == RPS: self._binding = PandaNGE_RPS(url)
