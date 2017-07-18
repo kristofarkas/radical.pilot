@@ -21,15 +21,7 @@ DB   = 'radical.pilot.db'
 #
 class PandaNGE_RP(PandaNGE):
     '''
-    This is an abstract base class for the Panda-NGE integration API.  We will
-    provide different implementations to use it:
-
-      - simple mockup dircetly against RP, for ease of testing
-      - REST based against the integration service, for testing and tight
-        integration
-      - MongoDB based according to the plan layed out in the document above
-
-    The API binding is determined at session construction, and default to RP.
+    This is the RP bound implementation of the abstract PandaNGE class/
     '''
 
     # --------------------------------------------------------------------------
@@ -100,7 +92,13 @@ class PandaNGE_RP(PandaNGE):
 
         ret = list()
         if resource_ids:
-            for pilot in self._pmgr.get_pilots():
+
+            pilots = self._pmgr.get_pilots()
+
+            if   not pilots                  : pilots = list()
+            elif not isinstance(pilots, list): pilots = [pilots]
+
+            for pilot in pilots:
                 if pilot.uid in resource_ids:
                     ret.append(pilot.as_dict())
         else:
@@ -115,6 +113,10 @@ class PandaNGE_RP(PandaNGE):
     def get_resource_states(self, resource_ids=None):
 
         pilots = self._pmgr.get_pilots(resource_ids)
+
+        if   not pilots                  : pilots = list()
+        elif not isinstance(pilots, list): pilots = [pilots]
+
         return [pilot.state for pilot in pilots]
 
 
