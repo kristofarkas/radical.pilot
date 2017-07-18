@@ -30,8 +30,21 @@ if __name__ == '__main__':
         print 'wait_resource_states'
         print panda_nge.wait_resource_states(states=rp.PMGR_ACTIVE)
 
+        print 'submit a task'
+        print panda_nge.submit_tasks([{'executable' : '/bin/true'}])
+
+        print 'get task states'
+        print panda_nge.get_task_states()
+
+        print 'wait for task completion'
+        print panda_nge.wait_task_states(states=rp.FINAL)
+
+
+
+
     finally:
         if panda_nge:
+            print 'close panda-nge session'
             panda_nge.close()
 
 

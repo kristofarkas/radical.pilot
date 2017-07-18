@@ -113,26 +113,30 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
-    def submit_units(self, descriptions):
+    def submit_tasks(self, descriptions):
 
-        units = self._umgr.submit_units(descriptions)
+        cuds = list()
+        for descr in descriptions:
+            cuds.append(ComputeUnitDescription(descr))
+
+        units = self._umgr.submit_units(cuds)
 
         return [unit.uid for unit in units]
 
 
     # --------------------------------------------------------------------------
     #
-    def get_unit_states(self, unit_ids=None):
+    def get_task_states(self, task_ids=None):
 
-        units = self._umgr.get_units()
+        units = self._umgr.get_units(task_ids)
         return [unit.state for unit in units]
 
 
     # --------------------------------------------------------------------------
     #
-    def wait_unit_states(self, unit_ids=None, states=None, timeout=None):
+    def wait_task_states(self, task_ids=None, states=None, timeout=None):
 
-        return self._umgr.wait_units(uids=unit_ids, state=states,
+        return self._umgr.wait_units(uids=task_ids, state=states,
                                      timeout=timeout)
 
 
