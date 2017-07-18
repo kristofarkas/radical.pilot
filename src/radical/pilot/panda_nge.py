@@ -3,27 +3,12 @@ def magic(*arg, **kwarg):
     return None
 
 
+# --------------------------------------------------------------------------
+#
+# see https://docs.google.com/document/d/1bm8ucgfi9SHjDy0w-ZX5NIdkjk87qFClMB9jMse75uM
+#
 class PandaNGE(object):
 
-    # see https://docs.google.com/document/d/1bm8ucgfi9SHjDy0w-ZX5NIdkjk87qFClMB9jMse75uM
-
-
-    # [resource_id]      = get_resources(query_string)
-    # resource_info_dict = get_resource_info[resource_id]
-    # [state]            = get_states   ([resource_ids])
-    # [state]            = wait         ([resource_ids],
-    #                                    [states_to_wait_on],
-    #                                    timeout=None)
-    #
-    # [unit_ids] = submit_units (descriptions)
-    # [state]    = wait         ([unit_ids],
-    #                            [states_to_wait_on],
-    #                            timeout=None)
-    # [state]    = get_states   ([unit_ids])
-    #
-    #
-    #
-    # `wait` calls will return 'state=None' on timeout
 
 
     # --------------------------------------------------------------------------
