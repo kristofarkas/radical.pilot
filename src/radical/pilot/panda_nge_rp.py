@@ -78,37 +78,22 @@ class PandaNGE_RP(PandaNGE):
     # --------------------------------------------------------------------------
     #
     def request_resources(self, requests):
+        '''
+        request a new resource (ie. submit a new RP pilot) for a given set of
+        cores / walltime.
+        '''
 
 
         pds = list()
         for request in requests:
-            pd  = [{'resource': 'local.localhost', 
-                    'cores'   : request['cores'], 
+            pd  = {'resource': 'local.localhost',
+                    'cores'   : request['cores'],
                     'runtime' : request['walltime']
-                   }]
+                  }
             pds.append(ComputePilotDescription(pd))
 
         pilots = self._pmgr.submit_pilots(pds)
         self._umgr.add_pilots(pilots)
-
-
-    # --------------------------------------------------------------------------
-    #
-    def request_resources(self):
-        '''
-        request a new resource (ie. submit a new RP pilot) for a given set of
-        cores / walltime.
-        '''
-
-        return self._binding.request_resources()
-
-
-        '''
-        request a new resource (ie. submit a new RP pilot) for a given set of
-        cores / walltime.
-        '''
-
-        return self._binding.request_resources()
 
 
     # --------------------------------------------------------------------------
