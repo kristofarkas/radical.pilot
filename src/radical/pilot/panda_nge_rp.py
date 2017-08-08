@@ -36,6 +36,8 @@ class PandaNGE_RP(PandaNGE):
         self._pmgr    = PilotManager(self._session)
         self._umgr    = UnitManager(self._session)
 
+        self._umgr.register_callback(self._unit_state_cb)
+
 
         pwd   = os.getcwd()
         fname = '%s/panda_nge_pilot.json' % pwd
@@ -75,6 +77,42 @@ class PandaNGE_RP(PandaNGE):
 
     # --------------------------------------------------------------------------
     #
+    def request_resources(self, requests):
+
+
+        pds = list()
+        for request in requests:
+            pd  = [{'resource': 'local.localhost', 
+                    'cores'   : request['cores'], 
+                    'runtime' : request['walltime']
+                   }]
+            pds.append(ComputePilotDescription(pd))
+
+        pilots = self._pmgr.submit_pilots(pds)
+        self._umgr.add_pilots(pilots)
+
+
+    # --------------------------------------------------------------------------
+    #
+    def request_resources(self):
+        '''
+        request a new resource (ie. submit a new RP pilot) for a given set of
+        cores / walltime.
+        '''
+
+        return self._binding.request_resources()
+
+
+        '''
+        request a new resource (ie. submit a new RP pilot) for a given set of
+        cores / walltime.
+        '''
+
+        return self._binding.request_resources()
+
+
+    # --------------------------------------------------------------------------
+    #
     def list_resources(self):
 
         return [pilot.uid for pilot in self._pmgr.get_pilots()]
@@ -94,6 +132,35 @@ class PandaNGE_RP(PandaNGE):
                     ret.append(pilot.uid)
         else:
             ret = self._pmgr.list_pilots()
+
+        return ret
+
+
+    # --------------------------------------------------------------------------
+    #
+    def get_requested_resources(self):
+
+        ret = list()
+        for info in self.get_resource_info():
+            ret.append([info['uid'], info['state'], 
+                        info['description']['cores'], 
+                        info['description']['walltime']
+                      ])
+
+        return ret
+
+
+    # --------------------------------------------------------------------------
+    #
+    def get_available_resources(self):
+
+        ret = list()
+        for info in self.get_resource_info():
+            if info == rp.PMGR_ACTIVE:
+                ret.append([info['uid'], info['state'], 
+                            info['description']['cores'], 
+                            info['description']['walltime']
+                           ])
 
         return ret
 
@@ -147,6 +214,12 @@ class PandaNGE_RP(PandaNGE):
     #
     def submit_tasks(self, descriptions):
 
+        # FIXME: we actually get PANDA task descriptions here, which we need to
+        #        translate into RP unit descriptions
+
+        # before we hand over tasks to the RP layer, we will stage files
+        # FIXME: panda level input file staging goes here.
+
         cuds = list()
         for descr in descriptions:
             cuds.append(ComputeUnitDescription(descr))
@@ -156,6 +229,28 @@ class PandaNGE_RP(PandaNGE):
         return [unit.uid for unit in units]
 
 
+    # --------------------------------------------------------------------------
+    #
+    def _unit_state_cb(self, unit, state):
+
+        # once the units are in final state, we can run the panda output staging
+        # routines.  To learn about final units, we registered this unit state
+        # callback.on umgr creation.
+        if state == rp.DONE:
+            pass
+            # FIXME: panda level output file staging goes here.
+            # FIXME: we need to make sure that PANDA is informed when our output
+            #        staging is done, and when the units can be controlled by
+            #        the panda layer again.  For that, we will set
+            #            'control': 'panda_pending'
+            #        in the unit dict returned to Panda on inspection, to signal
+            #        that control is relinguished.  Note that `DONE` is
+            #        insufficient, precisely because of the additional output
+            #        staging.
+            # NOTE:  can we translate the panda staging into proper RP staging
+            #        directives, to avoid explicit control management?
+
+            
     # --------------------------------------------------------------------------
     #
     def list_tasks(self):

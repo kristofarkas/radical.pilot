@@ -115,6 +115,23 @@ class PandaNGE_Server(object):
 
     # --------------------------------------------------------------------------
     #
+    @methodroute('/resources/', method="PUT")
+    def request_resources(self):
+
+        requests = json.loads(bottle.request.body.read())
+
+        try:
+            ret = self._backend.request_resources(requests)
+            return {"success" : True,
+                    "result"  : ret}
+        except Exception as e:
+            self._log.exception('oops')
+            return {"success" : False,
+                    'error'   : repr(e)}
+
+
+    # --------------------------------------------------------------------------
+    #
     @methodroute('/resources/', method="GET")
     def list_resources(self):
 
@@ -135,6 +152,36 @@ class PandaNGE_Server(object):
 
         try:
             ret = self._backend.find_resources(states)
+            return {"success" : True,
+                    "result"  : ret}
+        except Exception as e:
+            self._log.exception('oops')
+            return {"success" : False,
+                    'error'   : repr(e)}
+
+
+    # --------------------------------------------------------------------------
+    #
+    @methodroute('/resources/requested', method="GET")
+    def get_requested_resources(self):
+
+        try:
+            ret = self._backend.get_requested_resources()
+            return {"success" : True,
+                    "result"  : ret}
+        except Exception as e:
+            self._log.exception('oops')
+            return {"success" : False,
+                    'error'   : repr(e)}
+
+
+    # --------------------------------------------------------------------------
+    #
+    @methodroute('/resources/available', method="GET")
+    def get_available_resources(self):
+
+        try:
+            ret = self._backend.get_available_resources()
             return {"success" : True,
                     "result"  : ret}
         except Exception as e:
