@@ -39,27 +39,6 @@ class PandaNGE_RP(PandaNGE):
         self._umgr.register_callback(self._unit_state_cb)
 
 
-        pwd   = os.getcwd()
-        fname = '%s/panda_nge_pilot.json' % pwd
-        try:
-            pilot_descriptions = ru.read_json(fname)
-        except Exception as e:
-            sys.stderr.write('failed to read %s\nError: %s\n' % (fname, e))
-            sys.stderr.write('falling back to default configuration\n')
-            sys.stderr.flush()
-
-            pilot_descriptions = [{'resource': 'local.localhost', 
-                                   'cores'   : 4, 
-                                   'runtime' : 15}]
-
-        pds = list()
-        for pd in pilot_descriptions:
-            pds.append(ComputePilotDescription(pd))
-
-        pilots = self._pmgr.submit_pilots(pds)
-        self._umgr.add_pilots(pilots)
-
-
     # --------------------------------------------------------------------------
     #
     @property
@@ -129,7 +108,7 @@ class PandaNGE_RP(PandaNGE):
         for info in self.get_resource_info():
             ret.append([info['uid'], info['state'], 
                         info['description']['cores'], 
-                        info['description']['walltime']
+                        info['description']['runtime']
                       ])
 
         return ret
@@ -141,10 +120,10 @@ class PandaNGE_RP(PandaNGE):
 
         ret = list()
         for info in self.get_resource_info():
-            if info == rp.PMGR_ACTIVE:
+            if info['state'] == PMGR_ACTIVE:
                 ret.append([info['uid'], info['state'], 
                             info['description']['cores'], 
-                            info['description']['walltime']
+                            info['description']['runtime']
                            ])
 
         return ret
@@ -221,7 +200,7 @@ class PandaNGE_RP(PandaNGE):
         # once the units are in final state, we can run the panda output staging
         # routines.  To learn about final units, we registered this unit state
         # callback.on umgr creation.
-        if state == rp.DONE:
+        if state == DONE:
             pass
             # FIXME: panda level output file staging goes here.
             # FIXME: we need to make sure that PANDA is informed when our output

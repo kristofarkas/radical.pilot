@@ -76,6 +76,8 @@ class PandaNGE(object):
         cores / walltime.
         '''
 
+        print ' === 2 %s : %s' % (self, self._binding)
+
         return self._binding.request_resources(requests)
 
 
@@ -86,6 +88,8 @@ class PandaNGE(object):
         return the UIDs for all known resources (ie. RP pilots), independent of
         their state.
         '''
+
+        print ' === 1 %s : %s' % (self, self._binding)
 
         return self._binding.list_resources()
 

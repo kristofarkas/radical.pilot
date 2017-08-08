@@ -71,6 +71,16 @@ class PandaNGE_RPS(PandaNGE):
 
     # --------------------------------------------------------------------------
     #
+    def request_resources(self, requests):
+
+        if   not requests                  : requests = list()
+        elif not isinstance(requests, list): requests = [requests]
+
+        return self._query('put', '/resources/', data=requests)
+
+
+    # --------------------------------------------------------------------------
+    #
     def list_resources(self):
 
         return self._query('get', '/resources/')
@@ -110,6 +120,20 @@ class PandaNGE_RPS(PandaNGE):
             ret.append(info)
 
         return ret
+
+
+    # --------------------------------------------------------------------------
+    #
+    def get_requested_resources(self):
+
+        return self._query('get', '/resources/requested')
+
+
+    # --------------------------------------------------------------------------
+    #
+    def get_available_resources(self):
+
+        return self._query('get', '/resources/available')
 
 
     # --------------------------------------------------------------------------

@@ -10,11 +10,15 @@ if __name__ == '__main__':
 
     panda_nge = None
     try:
-        panda_nge = rp.PandaNGE(binding=rp.RP,  url=None)
-      # panda_nge = rp.PandaNGE(binding=rp.RPS, url='http://localhost:8080/')
+      # panda_nge = rp.PandaNGE(binding=rp.RP,  url=None)
+        panda_nge = rp.PandaNGE(binding=rp.RPS, url='http://localhost:8080/')
 
 
         print 'inspect resources'
+        print panda_nge.list_resources()
+        print
+
+        print 'request resources'
         print panda_nge.request_resources([{'cores'    : 8,
                                             'walltime' : 20}])
         print
@@ -28,10 +32,14 @@ if __name__ == '__main__':
         print
 
         print 'get_requested_resources'
-        print panda_nge.get_resource_info()
+        print panda_nge.get_requested_resources()
         print
 
         print 'get_available_resources'
+        print panda_nge.get_available_resources()
+        print
+
+        print 'get_resource_info'
         print panda_nge.get_resource_info()
         print
 
