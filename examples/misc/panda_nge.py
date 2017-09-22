@@ -11,7 +11,7 @@ if __name__ == '__main__':
     panda_nge = None
     try:
       # panda_nge = rp.PandaNGE(binding=rp.RP,  url=None)
-        panda_nge = rp.PandaNGE(binding=rp.RPS, url='http://localhost:8080/')
+        panda_nge = rp.PandaNGE(binding=rp.RPS, url='http://localhost:8090/')
 
 
         print 'inspect resources'
@@ -19,7 +19,10 @@ if __name__ == '__main__':
         print
 
         print 'request resources'
-        print panda_nge.request_resources([{'cores'    : 8,
+        print panda_nge.request_resources([{'resource' : 'ornl.titan_orte', 
+                                            'queue'    : 'debug',
+                                            'cores'    : 16*5,
+                                            'project'  : "CSC230",
                                             'walltime' : 20}])
         print
 

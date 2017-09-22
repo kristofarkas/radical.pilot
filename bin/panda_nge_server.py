@@ -94,7 +94,7 @@ class PandaNGE_Server(object):
     def serve(self):
 
         self._log.info('start serving')
-        bottle.run(host='localhost', port=8080, debug=True)
+        bottle.run(host='localhost', port=8090, debug=True)
 
 
     # --------------------------------------------------------------------------

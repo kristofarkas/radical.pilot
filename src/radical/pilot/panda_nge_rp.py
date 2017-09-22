@@ -65,7 +65,9 @@ class PandaNGE_RP(PandaNGE):
 
         pds = list()
         for request in requests:
-            pd  = {'resource': 'local.localhost',
+            pd  = {'resource' : request.get('resource', 'local.localhost'),
+                    'project' : request.get('project'),
+                    'queue'   : request.get('queue'),
                     'cores'   : request['cores'],
                     'runtime' : request['walltime']
                   }
