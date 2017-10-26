@@ -435,9 +435,13 @@ class Component(ru.Process):
 
             with self._cancel_lock:
                 self._cancel_list += uids
+
+        if cmd == 'terminate':
+            self._log.info('got termination command')
+            self.stop()
+
         else:
-            pass
-          # self._log.debug('command ignored: %s', cmd)
+            self._log.debug('command ignored: %s', cmd)
 
         return True
 
@@ -701,17 +705,22 @@ class Component(ru.Process):
     def finalize_child(self):
         pass # can be overloaded
 
+
     # --------------------------------------------------------------------------
     #
     def stop(self, timeout=None):
         '''
-        Before calling the ru.Process stop, we need to terminate and join all
-        threads, as those might otherwise invoke callback which can interfere
-        with termination.
+        We need to terminate and join all threads, close all comunication
+        channels, etc.  But we trust on the correct invocation of the finalizers
+        to do all this, and thus here only forward the stop request to the base
+        class.
         '''
 
-        self._log.info(' === stop %s (%s : %s : %s) [%s]', self.uid, os.getpid(),
+        self._log.info('stop %s (%s : %s : %s) [%s]', self.uid, os.getpid(),
                        self.pid, ru.get_thread_name(), ru.get_caller_name())
+
+        # FIXME: well, we don't completely trust termination just yet...
+        self._prof.flush()
 
         super(Component, self).stop(timeout)
 
@@ -1442,20 +1451,6 @@ class Worker(Component):
     def __init__(self, cfg, session=None):
 
         Component.__init__(self, cfg=cfg, session=session)
-
-
-    # --------------------------------------------------------------------------
-    #
-    # we overload state changing methods from component and assert neutrality
-    # FIXME: we should insert hooks around callback invocations, too
-    #
-    def advance(self, things, state=None, publish=True, push=False, prof=True):
-
-        if state:
-            raise RuntimeError("worker %s cannot advance state (%s)"
-                    % (self.uid, state))
-
-        Component.advance(self, things, state, publish, push, prof)
 
 
 # ------------------------------------------------------------------------------

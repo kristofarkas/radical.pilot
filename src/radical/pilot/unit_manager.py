@@ -134,14 +134,12 @@ class UnitManager(rpu.Component):
                              rpc.UMGR_STAGING_OUTPUT_QUEUE)
 
         # register the state notification pull cb
-        # FIXME: we may want to have the frequency configurable
         # FIXME: this should be a tailing cursor in the update worker
         self.register_timed_cb(self._state_pull_cb,
                                timer=self._cfg['db_poll_sleeptime'])
 
         # register callback which pulls units back from agent
         # FIXME: this should be a tailing cursor in the update worker
-        # FIXME: make frequency configurable
         self.register_timed_cb(self._unit_pull_cb,
                                timer=self._cfg['db_poll_sleeptime'])
 
@@ -377,7 +375,7 @@ class UnitManager(rpu.Component):
         if self._terminate.is_set():
             return False
 
-        # pull units those units from the agent which are about to get back
+        # pull units from the agent which are about to get back
         # under umgr control, and push them into the respective queues
         # FIXME: this should also be based on a tailed cursor
         # FIXME: Unfortunately, 'find_and_modify' is not bulkable, so we have
@@ -465,7 +463,7 @@ class UnitManager(rpu.Component):
 
     # --------------------------------------------------------------------------
     #
-    def _update_unit(self, unit_dict, publish=False):
+    def _update_unit(self, unit_dict, publish=False, advance=False):
 
         # FIXME: this is breaking the bulk!
 
@@ -492,7 +490,11 @@ class UnitManager(rpu.Component):
             for s in passed:
                 unit_dict['state'] = s
                 self._units[uid]._update(unit_dict)
-                self.advance(unit_dict, s, publish=publish, push=False)
+
+                # we don't usually advance state at this point, but also keep up
+                # with state changes reported from elsewhere
+                if advance:
+                    self.advance(unit_dict, s, publish=publish, push=False)
 
             return True
 

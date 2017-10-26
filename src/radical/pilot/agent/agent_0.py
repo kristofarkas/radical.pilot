@@ -151,7 +151,7 @@ class Agent_0(rpu.Worker):
                      'lm_info'      : self._lrms.lm_info.get('version_info'),
                      'lm_detail'    : self._lrms.lm_info.get('lm_detail')},
                  '$set'             : ['resource_details']}
-        self.advance(pilot, publish=True, push=False, prof=True)
+        self.advance(pilot, publish=True, push=False)
 
         # register idle callback to pull for units -- which is the only action
         # we have to perform, really
@@ -169,6 +169,9 @@ class Agent_0(rpu.Worker):
 
         # tear things down in reverse order
         self._prof.flush()
+        self._log.info('publish "terminate" cmd')
+        self.publish(rpc.CONTROL_PUBSUB, {'cmd' : 'terminate',
+                                          'arg' : None})
 
         self.unregister_timed_cb(self._check_units_cb)
         self.unregister_output(rps.AGENT_STAGING_INPUT_PENDING)
@@ -195,10 +198,10 @@ class Agent_0(rpu.Worker):
     def wait_final(self):
 
         while self._final_cause is None:
-            self._log.info('no final cause -> alive')
+          # self._log.info('no final cause -> alive')
             time.sleep(1)
 
-        self._log.debug(' === final: %s', self._final_cause)
+        self._log.debug('final: %s', self._final_cause)
 
       # if self._session:
       #     self._log.debug('close  session %s', self._session.uid)
@@ -432,6 +435,10 @@ class Agent_0(rpu.Worker):
             elif cmd == 'cancel_pilot':
                 self._log.info('cancel pilot cmd')
               # ru.attach_pudb(logger=self._log)
+              #
+                self._log.info('publish "terminate" cmd')
+                self.publish(rpc.CONTROL_PUBSUB, {'cmd' : 'terminate',
+                                                  'arg' : None})
 
               # self.stop()
                 self._ru_term.set()
@@ -530,7 +537,7 @@ class Agent_0(rpu.Worker):
         # now we really own the CUs, and can start working on them (ie. push
         # them into the pipeline).  We don't publish nor profile as advance,
         # since that happened already on the module side when the state was set.
-        self.advance(unit_list, publish=False, push=True, prof=False)
+        self.advance(unit_list, publish=False, push=True)
 
         return True
 
