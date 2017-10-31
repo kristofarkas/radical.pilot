@@ -101,7 +101,7 @@ class Spark(AgentSchedulingComponent):
         # way to take this value for the YARN scheduler config.
 
         cores_requested = cu['description']['cpu_processes'] \
-                        * cu['description']['threads']
+                        * cu['description']['cpu_threads']
         mem_requested   = 2048
         slots           = None
 

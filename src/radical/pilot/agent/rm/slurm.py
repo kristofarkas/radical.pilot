@@ -64,20 +64,29 @@ class Slurm(LRMS):
         # Verify that $SLURM_NPROCS <= $SLURM_NNODES * $SLURM_CPUS_ON_NODE
         if not slurm_nprocs <= slurm_nnodes * slurm_cpus_on_node:
             self._log.warning("$SLURM_NPROCS(%d) <= $SLURM_NNODES(%d) * $SLURM_CPUS_ON_NODE(%d)",
-                            slurm_nprocs, slurm_nnodes, slurm_cpus_on_node)
+                              slurm_nprocs, slurm_nnodes, slurm_cpus_on_node)
 
         # Verify that $SLURM_NNODES == len($SLURM_NODELIST)
         if slurm_nnodes != len(slurm_nodes):
             self._log.error("$SLURM_NNODES(%d) != len($SLURM_NODELIST)(%d)",
-                           slurm_nnodes, len(slurm_nodes))
+                            slurm_nnodes, len(slurm_nodes))
 
-        # Report the physical number of cores or the total number of cores
+        # use the physical number of cores or the total number of cores
         # in case of a single partial node allocation.
-        self.cores_per_node = min(slurm_cpus_on_node, slurm_nprocs)
-        self.gpus_per_node  = self._cfg.get('gpus_per_node', 0) # FIXME GPU
+        self.cpus_per_node = min(slurm_cpus_on_node, slurm_nprocs)
+        self.gpus_per_node = 0  # FIXME: GPU inspection
+
+        if self._cfg.get('cpus_per_node'):
+            self.cpus_per_node = self._cfg.get('cpus_per_node')
+
+        if self._cfg.get('gpus_per_node'):
+            self.gpus_per_node = self._cfg.get('gpus_per_node')
 
         # node names are unique, so can serve as node uids
         self.node_list = [[node, node] for node in slurm_nodes]
+
+        self.lm_info['cpus_per_node'] = self.cpus_per_node
+        self.lm_info['gpus_per_node'] = self.gpus_per_node
 
 
 # ------------------------------------------------------------------------------

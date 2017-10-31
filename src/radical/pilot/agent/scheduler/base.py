@@ -19,11 +19,12 @@ from ... import constants as rpc
 #
 # 'enum' for RPs's pilot scheduler types
 #
-SCHEDULER_NAME_CONTINUOUS   = "CONTINUOUS"
-SCHEDULER_NAME_SCATTERED    = "SCATTERED"
-SCHEDULER_NAME_TORUS        = "TORUS"
-SCHEDULER_NAME_YARN         = "YARN"
-SCHEDULER_NAME_SPARK        = "SPARK"
+SCHEDULER_NAME_CONTINUOUS = "CONTINUOUS"
+SCHEDULER_NAME_SCATTERED  = "SCATTERED"
+SCHEDULER_NAME_TORUS      = "TORUS"
+SCHEDULER_NAME_YARN       = "YARN"
+SCHEDULER_NAME_SPARK      = "SPARK"
+
 
 # ------------------------------------------------------------------------------
 #
@@ -201,7 +202,8 @@ class AgentSchedulingComponent(rpu.Component):
         self.nodes = None
         self._lrms = None
 
-        self._uid = ru.generate_id('agent.scheduling.%(counter)s', ru.ID_CUSTOM)
+        self._uid = ru.generate_id(cfg['owner'] + '.scheduling.%(counter)s',
+                                   ru.ID_CUSTOM)
 
         rpu.Component.__init__(self, cfg, session)
 
@@ -234,8 +236,8 @@ class AgentSchedulingComponent(rpu.Component):
         # NOTE: we could use a local queue here.  Using a zmq bridge goes toward
         #       an distributed scheduler, and is also easier to implement right
         #       now, since `Component` provides the right mechanisms...
-        self.register_publisher (rpc.AGENT_SCHEDULE_PUBSUB)
-        self.register_subscriber(rpc.AGENT_SCHEDULE_PUBSUB, self.schedule_cb)
+        self.register_publisher (rpc.AGENT_RESCHEDULE_PUBSUB)
+        self.register_subscriber(rpc.AGENT_RESCHEDULE_PUBSUB, self.reschedule_cb)
 
         # The scheduler needs the LRMS information which have been collected
         # during agent startup.  We dig them out of the config at this point.
@@ -422,7 +424,7 @@ class AgentSchedulingComponent(rpu.Component):
         # the lock is freed here
         if not unit['slots']:
 
-            # signal the unit remains unhandled (Fales signals that failure)
+            # signal the unit remains unhandled (False signals that failure)
             self._prof.prof('schedule_fail', uid=unit['uid'])
             return False
 
@@ -461,16 +463,16 @@ class AgentSchedulingComponent(rpu.Component):
 
         # needs to be locked as we try to release slots, but slots are acquired
         # in a different thread....
+        self._prof.prof('unschedule_start', uid=unit['uid'])
         with self._slot_lock :
-            self._prof.prof('unschedule_start', uid=unit['uid'])
             self._release_slot(unit['slots'])
             self._prof.prof('unschedule_stop',  uid=unit['uid'])
 
         # notify the scheduling thread, ie. trigger an attempt to use the freed
         # slots for units waiting in the wait pool.
-        self.publish(rpc.AGENT_SCHEDULE_PUBSUB, unit)
+        self.publish(rpc.AGENT_RESCHEDULE_PUBSUB, unit)
 
-        if self._log.isEnabledFor(logging.DEBUG):
+        if  self._log.isEnabledFor(logging.DEBUG):
             self._log.debug("after  unschedule %s: %s", unit['uid'], self.slot_status())
 
         # return True to keep the cb registered
@@ -479,7 +481,7 @@ class AgentSchedulingComponent(rpu.Component):
 
     # --------------------------------------------------------------------------
     #
-    def schedule_cb(self, topic, msg):
+    def reschedule_cb(self, topic, msg):
         '''
         This cb is triggered after a unit's resources became available again, so
         we can attempt to schedule units from the wait pool.
@@ -499,7 +501,7 @@ class AgentSchedulingComponent(rpu.Component):
 
         # cycle through wait queue, and see if we get anything placed now.  We
         # cycle over a copy of the list, so that we can modify the list on the
-        # fly,without locking the whole loop.  However, this is costly, too.
+        # fly, without locking the whole loop.  However, this is costly, too.
         for unit in self._wait_pool[:]:
 
             if self._try_allocation(unit):
@@ -516,6 +518,9 @@ class AgentSchedulingComponent(rpu.Component):
                 # FIXME: this assumes that no smaller or otherwise more suitable
                 #        CUs come after this one - which is naive, ie. wrong.
                 break
+
+        if  self._log.isEnabledFor(logging.DEBUG):
+            self._log.debug("after  reschedule %s: %s", unit['uid'], self.slot_status())
 
         # return True to keep the cb registered
         return True

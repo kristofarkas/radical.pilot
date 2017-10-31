@@ -19,9 +19,7 @@ import radical.utils as ru
 #
 # ------------------------------------------------------------------------------
 
-helloworld_mpi_bin  = 'helloworld_mpi.py'
-helloworld_mpi_path = '%s/%s' % (os.path.abspath(os.path.dirname(__file__)),
-                                 helloworld_mpi_bin)
+PWD = os.path.abspath(os.path.dirname(__file__))
 
 
 #------------------------------------------------------------------------------
@@ -49,8 +47,7 @@ if __name__ == '__main__':
 
         # read the config used for resource details
         report.info('read config')
-        pwd    = os.path.dirname(os.path.abspath(__file__))
-        config = ru.read_json('%s/config.json' % pwd)
+        config = ru.read_json('%s/config.json' % PWD)
         report.ok('>>ok\n')
 
         report.header('submit pilots')
@@ -82,7 +79,7 @@ if __name__ == '__main__':
         # Create a workload of ComputeUnits. 
         # Each compute unit runs a MPI test application.
 
-        n = 2   # number of units to run
+        n     = 2  # number of units to run
         t_num = 2  # number of threads   (OpenMP)
         p_num = 3  # number of processes (MPI)
         report.info('create %d unit description(s)\n\t' % n)
@@ -94,8 +91,8 @@ if __name__ == '__main__':
             # Here we don't use dict initialization.
             cud = rp.ComputeUnitDescription()
             cud.executable       = '/bin/sh'
-            cud.arguments        = ['%s/09_mpi_units.sh' % pwd]
-            cud.input_staging    = ['%s/09_mpi_units.sh' % pwd]
+            cud.arguments        = ['%s/09_mpi_units.sh' % PWD]
+            cud.input_staging    = ['%s/09_mpi_units.sh' % PWD]
             cud.cpu_processes    = p_num
             cud.cpu_threads      = t_num
             cud.cpu_process_type = rp.MPI
