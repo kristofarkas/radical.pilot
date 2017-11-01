@@ -157,4 +157,42 @@ def hostip(req=None, black_list=None, pref_list=None, logger=None):
 
 
 # ----------------------------------------------------------------------------------
+#
+def get_backfill(partition=None, max_cores=64, max_walltime):
+    '''
+    return a set of [partition, cores walltime] tuples which fit into the current
+    backfill.
+    '''
+
+    if partition:
+        part = '-p %s' % partition
+    else:
+        part = ''
+
+    out, err, ret = ru.sh_callout('showbf --blocking %s') % part
+
+    if err:
+        raise RuntimeError('showbf failed [%s]: %s' % (ret, err))
+
+    ret = list()
+    for line in out.splitlines():
+        part, cores, nodes, duration, start_offset, start_date = line.split()
+
+        if  part.beginswith('-') or \
+            part == 'Partition':
+            continue
+
+        cores = int(cores)
+
+        while cores > max_cores:
+            cores -= max_cores
+            ret.append([part, max_cores, -1])
+
+        if cores:
+            ret.append([part, cores, -1])
+
+    return ret
+
+
+# ----------------------------------------------------------------------------------
 
