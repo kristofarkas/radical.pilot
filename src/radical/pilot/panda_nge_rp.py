@@ -56,12 +56,37 @@ class PandaNGE_RP(PandaNGE):
 
     # --------------------------------------------------------------------------
     #
+    def request_backfill_resources(self, request_stub, partition, 
+                                         max_cores, max_walltime):
+        '''
+        request new backfill resources, chunked by the given max_cores and
+        max_walltime.  The given request_stub is used as template for the pilot
+        descriptions.
+        '''
+
+        bf = rp.utils.get_backfill(partition, max_cores, max_walltime)
+
+        pds = list()
+        for partition, cores, walltime in bf:
+            pd = {'resource': request.get('resource', 'local.localhost'),
+                  'project' : request.get('project'),
+                  'queue'   : request.get('queue'),
+                  'cores'   : cores, 
+                  'runtime' : walltime
+                 }
+            pds.append(ComputePilotDescription(pd))
+
+        pilots = self._pmgr.submit_pilots(pds)
+        self._umgr.add_pilots(pilots)
+
+
+    # --------------------------------------------------------------------------
+    #
     def request_resources(self, requests):
         '''
         request a new resource (ie. submit a new RP pilot) for a given set of
         cores / walltime.
         '''
-
 
         pds = list()
         for request in requests:

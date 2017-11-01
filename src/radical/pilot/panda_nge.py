@@ -70,6 +70,18 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
+    def request_backfill_resources(self, request_stub, partition=None,
+                                         max_cores=10*16, max_walltime=60):
+        '''
+        request resources as backfilling jobs.
+        '''
+
+        return self._binding.request_backfill_resources(request_stub, partition,
+                                                        max_cores, max_walltime)
+
+
+    # --------------------------------------------------------------------------
+    #
     def request_resources(self, requests):
         '''
         request a new resource (ie. submit a new RP pilot) for a given set of

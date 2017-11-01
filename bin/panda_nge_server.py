@@ -115,6 +115,24 @@ class PandaNGE_Server(object):
 
     # --------------------------------------------------------------------------
     #
+    @methodroute('/resources/backfill/<partition>/<max_cores>-<max-walltime>/', method="PUT")
+    def request_backfill_resources(self, partition, max_cores, max_walltime):
+
+        request_stub = json.loads(bottle.request.body.read())
+
+        try:
+            ret = self._backend.request_resources(request_stub, partition,
+                                                  max_cores, max_walltime)
+            return {"success" : True,
+                    "result"  : ret}
+        except Exception as e:
+            self._log.exception('oops')
+            return {"success" : False,
+                    'error'   : repr(e)}
+
+
+    # --------------------------------------------------------------------------
+    #
     @methodroute('/resources/', method="PUT")
     def request_resources(self):
 

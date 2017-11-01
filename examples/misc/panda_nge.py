@@ -14,9 +14,20 @@ if __name__ == '__main__':
         panda_nge = rp.PandaNGE(binding=rp.RPS, url='http://localhost:8090/')
 
 
+        print 'request backfill resources'
+        pprint.pprint(panda_nge.request_backfill_resources(
+                                           {'resource' : 'ornl.titan_orte', 
+                                            'queue'    : 'debug',
+                                            'project'  : "CSC230"},
+                                           partition='titan',
+                                           max_cores=30*5,
+                                           max_walltime=30))
+        print
+
         print 'inspect resources'
         print panda_nge.list_resources()
         print
+        sys.exit()
 
         print 'request resources'
         print panda_nge.request_resources([{'resource' : 'ornl.titan_orte', 
