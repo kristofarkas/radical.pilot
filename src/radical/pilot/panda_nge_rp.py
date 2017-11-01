@@ -15,6 +15,8 @@ from .compute_unit_description  import *
 from .compute_pilot_description import *
 from .states                    import *
 
+from . import utils as rpu
+
 # --------------------------------------------------------------------------
 #
 # see https://docs.google.com/document/d/1bm8ucgfi9SHjDy0w-ZX5NIdkjk87qFClMB9jMse75uM
@@ -64,16 +66,21 @@ class PandaNGE_RP(PandaNGE):
         descriptions.
         '''
 
-        bf = rp.utils.get_backfill(partition, max_cores, max_walltime)
+        bf = rpu.get_backfill(partition, max_cores, max_walltime)
+
+      # print 'bf list:'
+      # import pprint
+      # pprint.pprint(bf)
 
         pds = list()
-        for partition, cores, walltime in bf:
-            pd = {'resource': request.get('resource', 'local.localhost'),
-                  'project' : request.get('project'),
-                  'queue'   : request.get('queue'),
+        for [partition, cores, walltime] in bf:
+            pd = {'resource': request_stub.get('resource', 'local.localhost'),
+                  'project' : request_stub.get('project'),
+                  'queue'   : request_stub.get('queue'),
                   'cores'   : cores, 
                   'runtime' : walltime
                  }
+          # pprint.pprint(pd)
             pds.append(ComputePilotDescription(pd))
 
         pilots = self._pmgr.submit_pilots(pds)

@@ -3,6 +3,7 @@
 import radical.utils as ru
 import radical.pilot as rp
 
+import pprint
 
 #------------------------------------------------------------------------------
 #
