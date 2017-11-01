@@ -156,20 +156,49 @@ def hostip(req=None, black_list=None, pref_list=None, logger=None):
     return ip
 
 
-# ----------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #
-def get_backfill(partition=None, max_cores=64, max_walltime):
+def get_backfill(partition=None, max_cores=16*10, max_walltime=60):
     '''
     return a set of [partition, cores walltime] tuples which fit into the current
-    backfill.
+    backfill.  By default we split the backfillable cores into chunks of 10
+    nodes (where one node is used for the agent), and in walltimes of at most 60
+    min.
     '''
+
+    # --------------------------------------------------------------------------
+    def _duration_to_walltime(timestr):
+        '''
+        convert a timestring of the forms:
+
+            00:00:00:00  days:hours:min:sec
+               00:00:00       hours:min:sec
+                  00:00             min:sec
+                     00                 sec
+               INFINITY
+
+        into a number of minutes.  `INFINITY` is mapped to `max_walltime`.
+        '''
+        if timestr == 'INFINITY':
+            return max_walltime
+
+        walltime = 0.0
+        elems    = timestr.split(':')
+        if len(elems) >= 4:  walltime += 24 * 60 * int(elems[-4])
+        if len(elems) >= 3:  walltime +=      60 * int(elems[-3])
+        if len(elems) >= 2:  walltime +=           int(elems[-2])
+        if len(elems) >= 1:  walltime +=           int(elems[-1]) / 60
+
+        return min(walltime, max_walltime)
+    # --------------------------------------------------------------------------
+
 
     if partition:
         part = '-p %s' % partition
     else:
         part = ''
 
-    out, err, ret = ru.sh_callout('showbf --blocking %s') % part
+    out, err, ret = ru.sh_callout('showbf --blocking %s' % part)
 
     if err:
         raise RuntimeError('showbf failed [%s]: %s' % (ret, err))
@@ -178,21 +207,22 @@ def get_backfill(partition=None, max_cores=64, max_walltime):
     for line in out.splitlines():
         part, cores, nodes, duration, start_offset, start_date = line.split()
 
-        if  part.beginswith('-') or \
+        if  part.startswith('-') or \
             part == 'Partition':
             continue
 
-        cores = int(cores)
+        cores    = int(cores)
+        walltime = int(_duration_to_walltime(duration))
 
         while cores > max_cores:
             cores -= max_cores
-            ret.append([part, max_cores, -1])
+            ret.append([part, max_cores, walltime])
 
         if cores:
-            ret.append([part, cores, -1])
+            ret.append([part, cores, walltime])
 
     return ret
 
 
-# ----------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
