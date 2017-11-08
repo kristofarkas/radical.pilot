@@ -20,9 +20,10 @@ class PandaNGE_RPS(PandaNGE):
 
     # --------------------------------------------------------------------------
     #
-    def __init__(self, url):
+    def __init__(self, url, reporter=None):
 
         self._url = url.strip('/')
+        self._rep = reporter
 
 
     # --------------------------------------------------------------------------
@@ -41,10 +42,10 @@ class PandaNGE_RPS(PandaNGE):
         try:
             result = json.loads(r.content)
         except ValueError as e:
-            print mode
-            print self._url
-            print route
-            print r.content
+          # print mode
+          # print self._url
+          # print route
+          # print r.content
             raise RuntimeError('query failed: %s' % repr(e))
 
         if not result['success'] or r.status_code is not 200:
@@ -74,7 +75,7 @@ class PandaNGE_RPS(PandaNGE):
     def request_backfill_resources(self, request_stub, partition,
                                          max_cores, max_walltime):
 
-        print 'put to /resources/backfill/%s/%s/%s/' % (partition, max_cores, max_walltime)
+      # print 'put to /resources/backfill/%s/%s/%s/' % (partition, max_cores, max_walltime)
         return self._query('put', '/resources/backfill/%s/%s/%s/' % 
                            (partition, max_cores, max_walltime), data=request_stub)
 

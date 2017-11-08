@@ -28,12 +28,13 @@ class PandaNGE_RP(PandaNGE):
 
     # --------------------------------------------------------------------------
     #
-    def __init__(self, url=None):
+    def __init__(self, url=None, reporter=None):
         '''
         url: contact point (unused)
         '''
 
-        self._url = url
+        self._url     = url
+        self._rep     = reporter
         self._session = Session()
         self._pmgr    = PilotManager(self._session)
         self._umgr    = UnitManager(self._session)
@@ -66,6 +67,8 @@ class PandaNGE_RP(PandaNGE):
         descriptions.
         '''
 
+        self._rep.header('request resources tasks\n')
+        self._rep.info('\nrequesting backfill resources\n')
         bf = rpu.get_backfill(partition, max_cores, max_walltime)
 
       # print 'bf list:'
@@ -80,6 +83,9 @@ class PandaNGE_RP(PandaNGE):
                   'cores'   : cores, 
                   'runtime' : walltime
                  }
+            self._rep.ok('backfill  on %s [%5dcores * %4d min] @ %10s(%10s)]\n' %
+                         (pd['resource'], pd['cores'], pd['runtime'],
+                          pd['queue'], pd['project']))
           # pprint.pprint(pd)
             pds.append(ComputePilotDescription(pd))
 
@@ -95,6 +101,8 @@ class PandaNGE_RP(PandaNGE):
         cores / walltime.
         '''
 
+        self._rep.header('request resources tasks\n')
+        self._rep.info('\nrequesting dedicated resources\n')
         pds = list()
         for request in requests:
             pd  = {'resource' : request.get('resource', 'local.localhost'),
@@ -103,6 +111,9 @@ class PandaNGE_RP(PandaNGE):
                     'cores'   : request['cores'],
                     'runtime' : request['walltime']
                   }
+            self._rep.ok('provision on %s [%5dcores * %4d min] @ %10s(%10s)]\n' %
+                         (pd['resource'], pd['cores'], pd['runtime'],
+                          pd['queue'], pd['project']))
             pds.append(ComputePilotDescription(pd))
 
         pilots = self._pmgr.submit_pilots(pds)
@@ -113,6 +124,8 @@ class PandaNGE_RP(PandaNGE):
     #
     def list_resources(self):
 
+        self._rep.info('\nresource listing\n')
+        [self._rep.ok('%s\n' % pilot.uid) for pilot in self._pmgr.get_pilots()]
         return [pilot.uid for pilot in self._pmgr.get_pilots()]
 
 
@@ -123,6 +136,8 @@ class PandaNGE_RP(PandaNGE):
         if   not states                  : states = list()
         elif not isinstance(states, list): states = [states]
 
+        self._rep.info('\nresource query (%s)\n' % states)
+        [self._rep.ok('%s\n' % pilot.uid) for pilot in self._pmgr.get_pilots()]
         ret = list()
         if states:
             for pilot in self._pmgr.get_pilots():
@@ -138,19 +153,26 @@ class PandaNGE_RP(PandaNGE):
     #
     def get_requested_resources(self):
 
+        self._rep.info('\nresource info query\n')
+
         ret = list()
         for info in self.get_resource_info():
             ret.append([info['uid'], info['state'], 
                         info['description']['cores'], 
                         info['description']['runtime']
                       ])
-
+            self._rep.ok('%s: %10s [%5dcores * %4dmin]\n' % 
+                         (info['uid'], info['state'],
+                          info['description']['cores'], 
+                          info['description']['runtime']))
         return ret
 
 
     # --------------------------------------------------------------------------
     #
     def get_available_resources(self):
+
+        self._rep.info('\nresource info query (active)\n')
 
         ret = list()
         for info in self.get_resource_info():
@@ -159,7 +181,10 @@ class PandaNGE_RP(PandaNGE):
                             info['description']['cores'], 
                             info['description']['runtime']
                            ])
-
+                self._rep.ok('%s: %10s [%5dcores * %4dmin]\n' % 
+                             (info['uid'], info['state'],
+                              info['description']['cores'], 
+                              info['description']['runtime']))
         return ret
 
 
@@ -192,11 +217,14 @@ class PandaNGE_RP(PandaNGE):
     #
     def get_resource_states(self, resource_ids=None):
 
+        self._rep.info('\nresource state query\n')
         pilots = self._pmgr.get_pilots(resource_ids)
 
         if   not pilots                  : pilots = list()
         elif not isinstance(pilots, list): pilots = [pilots]
 
+        for pilot in pilots:
+            self._rep.ok('%s: %10s\n' % (pilot.uid, pilot.state))
         return [pilot.state for pilot in pilots]
 
 
@@ -204,6 +232,7 @@ class PandaNGE_RP(PandaNGE):
     #
     def wait_resource_states(self, resource_ids=None, states=None, timeout=None):
 
+        self._rep.info('\nwait for resource\n')
         return self._pmgr.wait_pilots(uids=resource_ids, state=states,
                                       timeout=timeout)
 
@@ -218,6 +247,7 @@ class PandaNGE_RP(PandaNGE):
         # before we hand over tasks to the RP layer, we will stage files
         # FIXME: panda level input file staging goes here.
 
+        self._rep.header('submit tasks\n')
         cuds = list()
         for descr in descriptions:
             cuds.append(ComputeUnitDescription(descr))
@@ -235,6 +265,7 @@ class PandaNGE_RP(PandaNGE):
         # routines.  To learn about final units, we registered this unit state
         # callback.on umgr creation.
         if state == DONE:
+          # self._rep.ok('task completed %s\n' % unit.uid)
             pass
             # FIXME: panda level output file staging goes here.
             # FIXME: we need to make sure that PANDA is informed when our output
@@ -247,6 +278,9 @@ class PandaNGE_RP(PandaNGE):
             #        staging.
             # NOTE:  can we translate the panda staging into proper RP staging
             #        directives, to avoid explicit control management?
+        elif state == FAILED:
+          # self._rep.error('task failed    %s\n' % unit.uid)
+            pass
 
             
     # --------------------------------------------------------------------------

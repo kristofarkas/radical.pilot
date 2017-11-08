@@ -32,18 +32,20 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
-    def __init__(self, binding=RP, url=None):
+    def __init__(self, binding=RP, url=None, reporter=None):
         '''
         binding: API implementation binding [RP, RPS]
         url    : contact point for the service and DB bindings
         '''
 
+        self._rep = reporter
+
         from .panda_nge_rp  import PandaNGE_RP
         from .panda_nge_rps import PandaNGE_RPS
 
-        if   binding == RP : self._binding = PandaNGE_RP (url)
-        elif binding == RPS: self._binding = PandaNGE_RPS(url)
-     #  elif binding == DB : self._binding = PandaNGE_DB (url)
+        if   binding == RP : self._binding = PandaNGE_RP (url, reporter)
+        elif binding == RPS: self._binding = PandaNGE_RPS(url, reporter)
+     #  elif binding == DB : self._binding = PandaNGE_DB (url, reporter)
         else               : raise NotImplementedError('unknown binding %s' % binding)
 
 
@@ -88,8 +90,6 @@ class PandaNGE(object):
         cores / walltime.
         '''
 
-        print ' === 2 %s : %s' % (self, self._binding)
-
         return self._binding.request_resources(requests)
 
 
@@ -100,8 +100,6 @@ class PandaNGE(object):
         return the UIDs for all known resources (ie. RP pilots), independent of
         their state.
         '''
-
-        print ' === 1 %s : %s' % (self, self._binding)
 
         return self._binding.list_resources()
 

@@ -59,9 +59,11 @@ class PandaNGE_Server(object):
     def __init__(self):
 
         self._log     = ru.get_logger('radical.pilot.nge')
-        self._backend = rp.PandaNGE(binding=rp.RP)
-        self._closed  = False
+        self._rep     = ru.LogReporter(name='radical.pilot')
+        self._rep.header('--- NGE (%s) ---' % rp.version)
 
+        self._backend = rp.PandaNGE(binding=rp.RP, reporter=self._rep)
+        self._closed  = False
 
 
     # --------------------------------------------------------------------------
@@ -70,7 +72,7 @@ class PandaNGE_Server(object):
     def close(self):
 
         try:
-            self._log.info('closing')
+            self._rep.header('Server terminates\n\n')
             self._closed = True
             self._backend.close()
             self._log.info('closed')
@@ -89,12 +91,13 @@ class PandaNGE_Server(object):
         if self._closed:
             raise RuntimeError('session closed')
 
+
     # --------------------------------------------------------------------------
     #
     def serve(self):
 
-        self._log.info('start serving')
-        bottle.run(host='localhost', port=8090, debug=True)
+        self._rep.info('serve on http://localhost:8080/\n\n')
+        bottle.run(host='localhost', port=8090, debug=False, quiet=True)
 
 
     # --------------------------------------------------------------------------
@@ -330,5 +333,4 @@ if __name__ == '__main__':
 
 
 # ------------------------------------------------------------------------------
-
 
