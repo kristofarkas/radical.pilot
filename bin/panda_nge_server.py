@@ -168,6 +168,7 @@ class PandaNGE_Server(object):
         request_stub = json.loads(bottle.request.body.read())
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.request_backfill_resources(request_stub, partition,
                                                            max_cores, max_walltime)
             return {"success" : True,
@@ -186,6 +187,7 @@ class PandaNGE_Server(object):
         requests = json.loads(bottle.request.body.read())
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.request_resources(requests)
             return {"success" : True,
                     "result"  : ret}
@@ -201,6 +203,7 @@ class PandaNGE_Server(object):
     def list_resources(self):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.list_resources()
             return {"success" : True,
                     "result"  : ret}
@@ -216,6 +219,7 @@ class PandaNGE_Server(object):
     def find_resources(self, states=None):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.find_resources(states)
             return {"success" : True,
                     "result"  : ret}
@@ -231,6 +235,7 @@ class PandaNGE_Server(object):
     def get_requested_resources(self):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.get_requested_resources()
             return {"success" : True,
                     "result"  : ret}
@@ -246,6 +251,7 @@ class PandaNGE_Server(object):
     def get_available_resources(self):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.get_available_resources()
             return {"success" : True,
                     "result"  : ret}
@@ -261,6 +267,7 @@ class PandaNGE_Server(object):
     def get_resource_info(self, resource_ids):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.get_resource_info(resource_ids)
             return {"success" : True,
                     "result"  : ret}
@@ -276,6 +283,7 @@ class PandaNGE_Server(object):
     def get_resource_states(self, resource_ids):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.get_resource_states(resource_ids)
             return {"success" : True,
                     "result"  : ret}
@@ -291,6 +299,7 @@ class PandaNGE_Server(object):
     def wait_resource_states(self, resource_ids, states, timeout):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.wait_resource_states(resource_ids, states, timeout)
             return {"success" : True,
                     "result"  : ret}
@@ -306,6 +315,7 @@ class PandaNGE_Server(object):
     def list_tasks(self):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.list_tasks()
             return {"success" : True,
                     "result"  : ret}
@@ -323,6 +333,7 @@ class PandaNGE_Server(object):
         descriptions = json.loads(bottle.request.body.read())
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.submit_tasks(descriptions)
             return {"success" : True,
                     "result"  : ret}
@@ -338,6 +349,7 @@ class PandaNGE_Server(object):
     def get_task_states(self, task_ids):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.get_task_states(task_ids)
             return {"success" : True,
                     "result"  : ret}
@@ -353,6 +365,7 @@ class PandaNGE_Server(object):
     def wait_task_states(self, task_ids, states, timeout):
 
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.wait_task_states(task_ids, states, timeout)
             return {"success" : True,
                     "result"  : ret}
