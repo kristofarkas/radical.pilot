@@ -6,6 +6,7 @@ from .panda_nge import PandaNGE
 
 import json
 import time
+import pprint
 import requests
 
 # --------------------------------------------------------------------------
@@ -22,8 +23,9 @@ class PandaNGE_RPS(PandaNGE):
     #
     def __init__(self, url, reporter=None):
 
-        self._url = url.strip('/')
-        self._rep = reporter
+        self._url     = url.strip('/')
+        self._rep     = reporter
+        self._cookies = list()
 
 
     # --------------------------------------------------------------------------
@@ -31,21 +33,23 @@ class PandaNGE_RPS(PandaNGE):
     def _query(self, mode, route, data=None):
 
         if mode == 'get':
-            r = requests.get(self._url + route)
+            r = requests.get(self._url + route, cookies=self._cookies)
 
         elif mode == 'put':
-            r = requests.put(self._url + route, json=data)
+            r = requests.put(self._url + route, cookies=self._cookies, json=data)
+
         else:
             raise ValueError('invalid query mode %s' % mode)
 
 
+        if r.cookies:
+            assert(not self._cookies), 'we allow auth only once'
+            self._cookies = r.cookies
+
         try:
             result = json.loads(r.content)
+
         except ValueError as e:
-          # print mode
-          # print self._url
-          # print route
-          # print r.content
             raise RuntimeError('query failed: %s' % repr(e))
 
         if not result['success'] or r.status_code is not 200:
@@ -60,6 +64,16 @@ class PandaNGE_RPS(PandaNGE):
     def uid(self):
 
         return self._query('get', '/uid/')
+
+
+    # --------------------------------------------------------------------------
+    #
+    def login(self, username, password):
+
+        data = {'username' : username, 
+                'password' : password}
+
+        return self._query('put', '/login/', data=data)
 
 
     # --------------------------------------------------------------------------

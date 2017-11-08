@@ -7,8 +7,15 @@ __license__   = "MIT"
 import radical.utils as ru
 import radical.pilot as rp
 
-import bottle
+import sys
 import json
+import pprint
+import bottle
+
+ACCOUNTS = {'ruslan' : 'nalsur', 
+            'andre'  : 'erdna', 
+            'matteo' : 'eottam', 
+            'guest'  : 'guest'}
 
 
 # ------------------------------------------------------------------------------
@@ -64,6 +71,42 @@ class PandaNGE_Server(object):
 
         self._backend = rp.PandaNGE(binding=rp.RP, reporter=self._rep)
         self._closed  = False
+        self._secret  = ru.generate_id('NGE', mode=ru.ID_UUID)
+
+
+    # --------------------------------------------------------------------------
+    #
+    @methodroute('/login/', method="PUT")
+    def login(self):
+
+        try:
+            data = json.loads(bottle.request.body.read())
+
+            username = data.get('username')
+            password = data.get('password')
+
+            if password != ACCOUNTS.get(username):
+                raise RuntimeError('invalid username/password - go away!')
+
+            bottle.response.set_cookie("account", username, 
+                                       secret=self._secret, path='/')
+            return {"success" : True,
+                    "result"  : username}
+
+        except Exception as e:
+            self._log.exception('unknown user')
+            return {"success" : False,
+                    "error"   : repr(e)}
+
+
+    # --------------------------------------------------------------------------
+    #
+    def check_cookie(self, request):
+
+        username = request.get_cookie("account", secret=self._secret)
+
+        if not username:
+            raise RuntimeError('invalid AAA session')
 
 
     # --------------------------------------------------------------------------
@@ -105,7 +148,9 @@ class PandaNGE_Server(object):
     @methodroute('/uid/', method="GET")
     def uid(self):
 
+
         try:
+            self.check_cookie(bottle.request)
             ret = self._backend.uid
             return {"success" : True,
                     "result"  : ret}
@@ -113,7 +158,6 @@ class PandaNGE_Server(object):
             self._log.exception('oops')
             return {"success" : False,
                     "error"   : repr(e)}
-
 
 
     # --------------------------------------------------------------------------

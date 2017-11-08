@@ -38,7 +38,7 @@ class PandaNGE_RP(PandaNGE):
         self._session = Session()
         self._pmgr    = PilotManager(self._session)
         self._umgr    = UnitManager(self._session)
-
+       
         self._umgr.register_callback(self._unit_state_cb)
 
 
@@ -48,6 +48,13 @@ class PandaNGE_RP(PandaNGE):
     def uid(self):
 
         return self._session.uid
+
+
+    # --------------------------------------------------------------------------
+    #
+    def login(self, username, password):
+
+        raise NotImplementedError('RP does not implement AAA')
 
 
     # --------------------------------------------------------------------------

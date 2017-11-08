@@ -62,6 +62,13 @@ class PandaNGE(object):
 
     # --------------------------------------------------------------------------
     #
+    def login(self, username, password):
+
+        return self._binding.login(username, password)
+
+
+    # --------------------------------------------------------------------------
+    #
     def close(self):
         '''
         free all aquired and requested resources, cancel all non-final tasks.
