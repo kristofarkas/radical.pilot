@@ -422,6 +422,7 @@ prof(){
 
                     # We got a request to cancel this cu
                     action += 1
+                    self._log.debug('Killing process ',cu['proc'].pid)
                     cu['proc'].kill()
                     cu['proc'].wait() # make sure proc is collected
 
